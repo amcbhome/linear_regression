@@ -34,4 +34,4 @@ with col2:
     activity = st.slider("Select activity level (000s units):", 0, 100, 50)
     if st.button("Calculate"):
         predicted = model.predict(np.array([[activity]]))[0]
-        st.metric(label="Estimated Cost", value=f"${int(predicted * 1000):,}")
+        st.metric(label="Estimated Cost", value=f"£{int(predicted * 1000):,}")
