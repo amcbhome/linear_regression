@@ -26,7 +26,7 @@ st.title("Production Cost Estimator")
 col1, col2 = st.columns([2, 1])
 
 with col1:
-    st.subheader(f"Historical Data (r = {r:.2f}, r² = {r_squared:.2f})")
+    st.subheader(f"Based on historical Data (r = {r:.2f})")
     st.table(df)
 
 with col2:
