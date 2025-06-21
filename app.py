@@ -11,7 +11,7 @@ data = {
 }
 df = pd.DataFrame(data)
 
-# Fit model
+# Fit linear regression model
 X = df[['Activity (000s units)']]
 y = df['Total Cost (£000)']
 model = LinearRegression()
@@ -20,41 +20,16 @@ model.fit(X, y)
 # Correlation coefficient
 r = np.corrcoef(df['Activity (000s units)'], df['Total Cost (£000)'])[0, 1]
 
-# Page title
+# App title
 st.title("Production Cost Estimator")
 
-# Layout with 3 columns
-col1, col2, col3 = st.columns([1, 1, 1])
+# Column layout
+col_data, col_plot, col_calc = st.columns([1, 2, 1])
 
-# Column 1: Regression Plot
-with col1:
-    st.subheader("Regression Plot")
-
-    # Extended range for line of best fit
-    x_range = np.linspace(0, 200, 100).reshape(-1, 1)
-    y_range = model.predict(x_range)
-
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.scatter(df['Activity (000s units)'], df['Total Cost (£000)'], color='blue', label='Actual data')
-    ax.plot(x_range, y_range, color='red', label='Regression line')
-
-    # If calculated, add forecast point
-    if 'activity' in st.session_state and 'predicted' in st.session_state:
-        ax.scatter(st.session_state.activity, st.session_state.predicted, color='green', label='Forecast', zorder=5)
-        ax.annotate(f"({st.session_state.activity}, £{int(st.session_state.predicted)})",
-                    (st.session_state.activity, st.session_state.predicted),
-                    textcoords="offset points", xytext=(5,5))
-
-    ax.set_xlim(0, 200)
-    ax.set_xlabel('Activity (000s units)')
-    ax.set_ylabel('Total Cost (£000)')
-    ax.set_title('Linear Regression Forecast')
-    ax.legend()
-    st.pyplot(fig, use_container_width=True)
-
-# Column 2: Data Table
-with col2:
-    st.subheader(f"Based on historical Data (r = {r:.2f})")
+# ----- Column 1: Data -----
+with col_data:
+    st.subheader("📊 Data")
+    st.markdown(f"**Correlation (r) = {r:.2f}**")
 
     html_table = """
     <style>
@@ -96,10 +71,37 @@ with col2:
     """
     st.markdown(html_table, unsafe_allow_html=True)
 
-# Column 3: Forecast calculator
-with col3:
-    st.subheader("Forecast Calculator")
-    activity = st.slider("Select activity level (000s units):", 0, 100, 50)
+# ----- Column 2: Plot -----
+with col_plot:
+    st.subheader("📈 Regression Plot")
+
+    # Extended range for best-fit line
+    x_range = np.linspace(0, 200, 200).reshape(-1, 1)
+    y_range = model.predict(x_range)
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.scatter(df['Activity (000s units)'], df['Total Cost (£000)'], color='blue', label='Actual data')
+    ax.plot(x_range, y_range, color='red', label='Regression line')
+
+    # Display forecast point if calculated
+    if 'activity' in st.session_state and 'predicted' in st.session_state:
+        ax.scatter(st.session_state.activity, st.session_state.predicted, color='green', s=100, label='Forecast')
+        ax.annotate(f"({st.session_state.activity}, £{int(st.session_state.predicted)})",
+                    (st.session_state.activity, st.session_state.predicted),
+                    textcoords="offset points", xytext=(5, 5))
+
+    ax.set_xlim(0, 200)
+    ax.set_xlabel("Activity (000s units)")
+    ax.set_ylabel("Total Cost (£000)")
+    ax.set_title("Linear Regression Forecast")
+    ax.legend()
+    st.pyplot(fig, use_container_width=True)
+
+# ----- Column 3: Calculator -----
+with col_calc:
+    st.subheader("🧮 Forecast Calculator")
+    activity = st.slider("Select activity level (000s units):", 0, 200, 50)
+
     if st.button("Calculate"):
         predicted = model.predict(np.array([[activity]]))[0]
         st.session_state.activity = activity
